@@ -15,8 +15,8 @@ def test_card_init(test_input_rank, test_input_suite):
     assert c.suite == test_input_suite
 
 
-# Här testar vi ifall om rank på vårat card är samma men olika suite.
-# Här jämför man två kort som har samma rank men olika suite.
+# Här testar vi om __eq__ ger att 2 kort med olika färger är av samma värde
+# Samt att olika kort inte är av samma värde (lika så om de har samma färg)
 def test_card_eq():
     c1 = Card(1, "Hearts")
     c2 = Card(1, "Spades")
@@ -29,8 +29,8 @@ def test_card_eq():
     assert c1 != c4
 
 
-# Detta test testar vår lt funktion, som låter oss använda < när vi ska jämföra.
-# Alltså jämförelse mellan 2 olika objekt.
+# __lt__ låter oss använda < när vi ska jämföra 2 kort.
+# Här kontrollerar vi att det är rank som styr att ett kort är mindre än ett annat
 def test_card_lt():
     c1 = Card(1, "Hearts")
     c2 = Card(1, "Spades")
@@ -48,7 +48,8 @@ def test_card_lt():
     assert not c3 < c2
 
 
-# Funktionen gt är ett jämförelse där man kan jämföra två objekt med >.
+# Funktionen gt låter oss jämföra två objekt med >.
+# Här kollar vi att det är rank som styr vad som är störst
 def test_card_gt():
     c1 = Card(1, "Hearts")
     c2 = Card(1, "Spades")
@@ -71,28 +72,40 @@ def test_deck_len():
     assert len(d.cards) == 52
 
 
-# Först sparar vi en kortlek som är sorterad efter färg
-# Sen kallar vi på sort metoden, och ser att kortlekarna nu är olika
+# Först skapar vi en kortlek, sedan blandar vi den, sen så använder vi våran sort metod
+# Sen kollar vi igenom kortlistan,
+# så att föregående kort i listan har likadant eller mindre värde än det nuvarande kortet.
 def test_deck_sort():
     d = Deck()
-    fresh_deck = d.cards
-    assert fresh_deck == d.cards
+    d.shuffle()
     d.sort()
-    sorted_deck = d.cards
-    assert sorted_deck == d.cards
-    assert fresh_deck != sorted_deck
+
+    prev_card = d.cards[0]
+    for card in d.cards:
+        card = prev_card or card > prev_card
+        prev_card = card
 
 
-# Vi tar ett kort och kollar att kortet försvinner från kortleken.
+# Vi tar ett kort och kollar att kortet finns i kortleken efter det så kollar vi att kortleken minskar med ett kort.
+# Sedan kollar vi att kortet som nu tas är överst i högen.
+# Sen tar vi ytterligare 2 kort, eftersom kortleken är sorterad enl nummer så har vi tagit alla kungar,
+# så i slutet kollar vi att inga kungar finns kvar i kortleken.
 def test_deck_take():
     d = Deck()
+    d.sort()
+
     assert len(d.cards) == 52
     assert d.take() in d.cards
     assert len(d.cards) == 51
+    assert d.cards[-1] == d.take()
+
+    d.take()
+    picked_card = d.take()
+    assert picked_card not in d.cards
 
 
 # Vi tar ett kort, kontrollerar att kortleken minskar.
-# Sedan lägger vi tillbaka kortet och ser att kortleken ökar.
+# Sedan lägger vi tillbaka kortet och ser att kortleken ökar, samt att kortet ligger överst i högen.
 def test_deck_put():
     d = Deck()
     assert len(d.cards) == 52
@@ -101,7 +114,7 @@ def test_deck_put():
     picked_card = d.take()
     assert len(d.cards) == 50
     d.put(picked_card)
-    assert picked_card in d.cards
+    assert picked_card == d.cards[-1]
     assert len(d.cards) == 51
 
 
