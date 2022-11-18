@@ -1,4 +1,4 @@
 # Laboration_2
 
-# Pontus Bruse
+# Pontus Brusewitz
 # Masoud Sakhi
